@@ -24,6 +24,7 @@ function App() {
   const [eraserFlag, setEraserFlag] = useState<boolean>(false);
   const [strokeColor, setStrokeColor] = useState<string>('red');
   const [strokeValue, setStrokeValue] = useState<string>('3');
+  const [trigger, setTrigger] = useState<number>(0);
 
   const handleClick = (title: string) => {
     switch (title) {
@@ -33,6 +34,9 @@ function App() {
       case 'Eraser':
         setEraserFlag(!eraserFlag);
         break;
+      case 'Download':
+        setTrigger((prev)=> prev +1)
+        return;
    }
   }
 console.log(pencilFlag,eraserFlag)
@@ -44,7 +48,9 @@ console.log(pencilFlag,eraserFlag)
       setStrokeColor(pencilColor);
       setStrokeValue(pencilValue);
     }
-  },[eraserFlag,pencilColor,pencilValue,eraserValue])
+  }, [eraserFlag, pencilColor, pencilValue, eraserValue])
+  
+  
 
   const handlePencilValue = (e:ChangeEvent<HTMLInputElement>) => {
     setPencilValue(e.target.value);
@@ -74,6 +80,7 @@ console.log(pencilFlag,eraserFlag)
       <Canvas
         strokeValue={strokeValue}
         strokeColor={strokeColor}
+        trigger={trigger}
       />
     </>
   )

@@ -1,6 +1,8 @@
 import { useRef, useState, MouseEvent, useEffect } from "react"
 
-const Canvas = ({ strokeValue, strokeColor}: { strokeValue: string, strokeColor: string}) => {
+const Canvas = (
+    { strokeValue, strokeColor,trigger  }:
+        { strokeValue: string, strokeColor: string, trigger:number}) => {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const [mouse, setMouse] = useState<boolean>(false);
     const toolRef = useRef<CanvasRenderingContext2D | null>(null);
@@ -13,6 +15,20 @@ const Canvas = ({ strokeValue, strokeColor}: { strokeValue: string, strokeColor:
             toolRef.current = null; 
         }
     }, [canvasRef]);
+
+    useEffect(() => {
+        handleDownload()
+    },[trigger])
+
+    const handleDownload = ():void => {
+        const url = canvasRef?.current?.toDataURL();
+        if (url) {
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "board.jpg";
+            a.click();
+        }
+    }
 
 
     useEffect(() => {
