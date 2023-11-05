@@ -1,100 +1,98 @@
-import { useRef, useState, MouseEvent, useEffect } from "react"
+import { useState, MouseEvent, useEffect } from "react";
 
-const Canvas = (
-    { strokeValue, strokeColor,trigger  }:
-        { strokeValue: string, strokeColor: string, trigger:number}) => {
-    const canvasRef = useRef<HTMLCanvasElement | null>(null);
-    const [mouse, setMouse] = useState<boolean>(false);
-    const toolRef = useRef<CanvasRenderingContext2D | null>(null);
+interface CanvasProps {
+    canvasRef: React.MutableRefObject<HTMLCanvasElement>;
+    toolRef: any;
+    strokeValue: string;
+    strokeColor: string;
+    historyRef: any;
+}
+
+const Canvas: React.FC<CanvasProps> = ({ canvasRef, toolRef, strokeValue, strokeColor, historyRef }) => {
+
+
+    const [mouse, setMouse] = useState(false);
 
     useEffect(() => {
         const data = canvasRef?.current?.getContext("2d");
         if (data) {
             toolRef.current = data;
         } else {
-            toolRef.current = null; 
+            toolRef.current = null;
         }
-    }, [canvasRef]);
 
-    useEffect(() => {
-        handleDownload()
-    },[trigger])
-
-    const handleDownload = ():void => {
-        const url = canvasRef?.current?.toDataURL();
-        if (url) {
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = "board.jpg";
-            a.click();
-        }
-    }
-
-
-    useEffect(() => {
-        if (toolRef?.current) {
-
-            toolRef.current.lineWidth = +strokeValue;
-            toolRef.current.strokeStyle = strokeColor;
-        }
-    },[strokeValue,strokeColor])
+    }, [canvasRef.current]);
 
 
     useEffect(() => {
         if (toolRef.current) {
-            toolRef.current.strokeStyle = strokeColor;
             toolRef.current.lineWidth = +strokeValue;
+            toolRef.current.strokeStyle = strokeColor;
         }
-    }, [toolRef.current])
+    }, [strokeValue, strokeColor]);
 
-
-
-    function beginPath(strokeObj: { x: number, y: number }) {
-        if (toolRef?.current) {
+    const beginPath = (strokeObj: { x: number; y: number }) => {
+        if (toolRef.current) {
             toolRef.current.beginPath();
             toolRef.current.moveTo(strokeObj.x, strokeObj.y);
         }
-    }
+    };
 
-
-    function drawStroke(strokeObj: {
+    const drawStroke = (strokeObj: {
         x: number;
         y: number;
         color: string;
         width: number;
-    }) {
-        if (toolRef?.current) {
-            toolRef.current.strokeStyle = strokeObj?.color,
-            toolRef.current.lineWidth = strokeObj.width,
+    }) => {
+        if (toolRef.current) {
+            toolRef.current.strokeStyle = strokeObj.color;
+            toolRef.current.lineWidth = strokeObj.width;
             toolRef.current.lineTo(strokeObj.x, strokeObj.y);
             toolRef.current.stroke();
         }
-    }
-
+    };
 
     const handleMousedown = (e: MouseEvent<HTMLCanvasElement>) => {
         setMouse(true);
-        beginPath({ x: e.nativeEvent.offsetX, y: e.nativeEvent.offsetY })
-    }
-
+        beginPath({ x: e.nativeEvent.offsetX, y: e.nativeEvent.offsetY });
+    };
 
     const handleMousemove = (e: MouseEvent<HTMLCanvasElement>) => {
         if (mouse) {
-            let data = {
+            const data = {
                 x: e.nativeEvent.offsetX,
                 y: e.nativeEvent.offsetY,
                 color: strokeColor,
                 width: +strokeValue,
-            }
-            drawStroke(data)
+            };
+            drawStroke(data);
         }
-    }
-
+    };
 
     const handleMouseup = () => {
         setMouse(false);
-    }
 
+        if ((historyRef.current.undoStatus == false && historyRef.current.redoStatus == false)) {
+            let url: any = canvasRef.current && canvasRef.current.toDataURL();
+            if (historyRef.current.currentStateIndex < historyRef.current.canvasState.length - 1) {
+                if (historyRef.current.currentStateIndex < 20) {
+                    return;
+                }
+                var indexToBeInserted = historyRef.current.currentStateIndex + 1;
+                historyRef.current.canvasState[indexToBeInserted] = url;
+                var numberOfElementsToRetain = indexToBeInserted + 1;
+                historyRef.current.canvasState = historyRef.current.canvasState.splice(0, numberOfElementsToRetain);
+            }
+            else {
+                if (historyRef.current.currentStateIndex >= 19) {
+                    historyRef.current.currentStateIndex -= 1;
+                    historyRef.current.canvasState.shift();
+                }
+                historyRef.current.canvasState.push(url);
+            }
+            historyRef.current.currentStateIndex = historyRef.current.canvasState.length - 1;
+        }
+    };
 
     return (
         <canvas
@@ -104,8 +102,12 @@ const Canvas = (
             onMouseUp={handleMouseup}
             width={window.innerWidth}
             height={window.innerHeight}
-            className="cursor-pointer"></canvas>
-    )
-}
+            className="cursor-pointer"
+        ></canvas>
+    );
+};
+
 
 export default Canvas
+
+

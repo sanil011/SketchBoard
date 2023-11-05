@@ -1,0 +1,53 @@
+.sticky-cont {
+    height: 15rem;
+    width: 15rem;
+    position: absolute;
+    top: 15rem;
+    left: 10rem;
+    overflow: hidden;
+}
+
+.header-cont {
+    background-color: #f1f2f6;
+    height: 2rem;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.header-cont > * {
+    height: 1.3rem;
+    width: 1.3rem;
+    margin-right: 0.5rem;
+    border-radius: 50%;
+}
+
+.minimize {
+    background-color: #2ed573;
+    cursor: pointer;
+}
+
+.remove {
+    background-color: #ff4757;
+    cursor: pointer;
+}
+.note-cont {
+    height: calc(100% - 2rem);
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    border: 1px solid lightgrey;
+}
+
+textarea {
+    height: 100%;
+    width: 100%;
+    outline: none;
+    border: none;
+    resize: none;
+}
+
+img {
+    height: 100%;
+    width: 100%;
+    cursor: pointer;
+    object-fit: contain;
+}
