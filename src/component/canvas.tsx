@@ -3,7 +3,7 @@ import { useState, MouseEvent, useEffect } from "react";
 interface CanvasProps {
     canvasRef: React.MutableRefObject<HTMLCanvasElement>;
     toolRef: any;
-    strokeValue: string;
+    strokeValue: number;
     strokeColor: string;
     historyRef: any;
 }
