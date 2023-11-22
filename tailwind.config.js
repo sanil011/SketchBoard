@@ -9,7 +9,8 @@ export default {
   theme: {
     extend: {
       boxShadow: {
-        '3xl': 'rgba(0, 0, 0, 0.35) 0px 5px 15px'
+        '3xl': 'rgba(0, 0, 0, 0.35) 0px 5px 15px',
+        '4xl':'#ffca64 0px 7px 29px 0px'
       },
       keyframes: {
         scaleTools: {
@@ -21,7 +22,7 @@ export default {
         scaleTools: 'scaleTools 0.9s'
       },
       fontFamily: {
-        'space': ['Poppins','sans-serif','Space Grotesk']
+        'space': ['Space Grotesk','sans-serif']
       }
     },
   },

@@ -281,7 +281,8 @@ function Draw() {
                 {showMenu ? 'hidden' : 'animate-scaleTools flex w-[55vw] py-4 z-10 bg-white absolute h-24 top-8 left-[25vw] justify-around  border border-[#f1f2f6] shadow-3xl'}
                 ref={pencilRef}
             >
-                {icons.map((icon) => <img key={icon.id} src={icon.icon} alt='icon' onMouseDown={() => handleClick(icon.id)} className={`${icon.id} cursor-pointer   w-16`} />)}
+                {icons.map((icon) => <img key={icon.id} src={icon.icon} alt='icon' onMouseDown={() => handleClick(icon.id)}
+                    className={`${icon.id} cursor-pointer ${icon.id == "Eraser" && eraser && "border-2 border-black "}   w-16`} />)}
             </div>
             <div className={`${pencilFlag ? "block" : "hidden"} absolute z-10 py-4 px-2 left-[25vw] top-32 bg-white w-36 rounded shadow-3xl`}>
                 <div className="h-8 flex justify-center items-center">
