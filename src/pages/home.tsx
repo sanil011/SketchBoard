@@ -26,7 +26,7 @@ const Home = () => {
 
 
   return (
-    <div className="bg-[#020917] min-h-screen text-white ">
+    <div className="bg-[#6C4BEF] min-h-screen text-white ">
 
       <div ref={headerRef} className=" ">
         <Header />

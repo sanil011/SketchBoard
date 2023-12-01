@@ -6,9 +6,10 @@ interface CanvasProps {
     strokeValue: number;
     strokeColor: string;
     historyRef: any;
+    eraser: any;
 }
 
-const Canvas: React.FC<CanvasProps> = ({ canvasRef, toolRef, strokeValue, strokeColor, historyRef }) => {
+const Canvas: React.FC<CanvasProps> = ({ canvasRef, toolRef, strokeValue, strokeColor, historyRef,eraser }) => {
 
 
     const [mouse, setMouse] = useState(false);
@@ -33,8 +34,15 @@ const Canvas: React.FC<CanvasProps> = ({ canvasRef, toolRef, strokeValue, stroke
 
     const beginPath = (strokeObj: { x: number; y: number }) => {
         if (toolRef.current) {
-            toolRef.current.beginPath();
-            toolRef.current.moveTo(strokeObj.x, strokeObj.y);
+            if (eraser) {
+                toolRef.current.globalCompositeOperation = "destination-out";
+                toolRef.current.beginPath();
+                toolRef.current.moveTo(strokeObj.x, strokeObj.y);
+            } else {
+                toolRef.current.globalCompositeOperation = "source-over";
+                toolRef.current.beginPath();
+                toolRef.current.moveTo(strokeObj.x, strokeObj.y);
+            }
         }
     };
 
@@ -45,10 +53,18 @@ const Canvas: React.FC<CanvasProps> = ({ canvasRef, toolRef, strokeValue, stroke
         width: number;
     }) => {
         if (toolRef.current) {
-            toolRef.current.strokeStyle = strokeObj.color;
-            toolRef.current.lineWidth = strokeObj.width;
-            toolRef.current.lineTo(strokeObj.x, strokeObj.y);
-            toolRef.current.stroke();
+            if (eraser) {
+                toolRef.current.globalCompositeOperation = "destination-out";
+                toolRef.current.lineWidth = strokeObj.width;
+                toolRef.current.lineTo(strokeObj.x, strokeObj.y);
+                toolRef.current.stroke();
+            } else {
+                toolRef.current.globalCompositeOperation = "source-over";
+                toolRef.current.strokeStyle = strokeObj.color;
+                toolRef.current.lineWidth = strokeObj.width;
+                toolRef.current.lineTo(strokeObj.x, strokeObj.y);
+                toolRef.current.stroke();
+            }
         }
     };
 

@@ -115,7 +115,6 @@ function Draw() {
 
     useEffect(() => {
         if (eraser) {
-            setStrokeColor("#ffffff");
             setStrokeValue(eraserValue);
         } else {
             setStrokeColor(pencilColor);
@@ -319,6 +318,7 @@ function Draw() {
                 canvasRef={canvasRef}
                 toolRef={toolRef}
                 strokeValue={strokeValue}
+                eraser={eraser}
                 strokeColor={strokeColor}
                 historyRef={historyRef}
             />
