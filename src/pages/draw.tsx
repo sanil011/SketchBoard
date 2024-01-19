@@ -1,18 +1,10 @@
-import Pencil from "../assets/pencil.png"
-import Eraser from "../assets/eraser.png"
-import Download from "../assets/download.png"
-import Photo from "../assets/photo.png"
-import Undo from "../assets/undo.svg"
-import Redo from "../assets/redo.svg"
-import Menu from "../assets/menu.png"
-import Notes from "../assets/notes.png";
-import Cross from "../assets/cross.png";
 import Canvas from "../component/canvas"
 import '../app.css';
-import { Slider } from '@mui/material';
 import { useEffect, useState, useRef } from 'react'
-import useOutsideClick from '../hooks/useOutsideClick'
-
+import useOutsideClick from '../hooks/useOutsideClick';
+import ActionBar from "../component/actionBar"
+import { Tools, ToolsType } from "../type"
+import useHistory  from "../hooks/useHistory"
 
 
 function dragAndDrop(element: HTMLElement | null, event: MouseEvent) {
@@ -49,69 +41,25 @@ function dragAndDrop(element: HTMLElement | null, event: MouseEvent) {
 
 
 function Draw() {
-    const icons = [
-        { icon: Pencil, id: "Pencil" },
-        { icon: Eraser, id: "Eraser" },
-        { icon: Download, id: "Download" },
-        { icon: Photo, id: "Photo" },
-        { icon: Notes, id: "Notes" },
-        { icon: Redo, id: "Redo" },
-        { icon: Undo, id: "Undo" }
-    ]
-
+    const initialTool: ToolsType = Tools.pencil;
     const canvasRef = useRef<any>();
+    const { undo, redo, update, history } = useHistory();
     const [pencilFlag, setPencilFlag] = useState<boolean>(false);
-    const [pencilValue, setPencilValue] = useState<number>(3);
-    const [pencilColor, setPencilColor] = useState<string>('red');
-    const [eraserValue, setEraserValue] = useState<number>(3);
+    const [pencilValue, setPencilValue] = useState<number>(5);
+    const [pencilColor, setPencilColor] = useState<string>('black');
+    const [eraserValue, setEraserValue] = useState<number>(7);
     const [eraserFlag, setEraserFlag] = useState<boolean>(false);
     const [strokeColor, setStrokeColor] = useState<string>('red');
     const [strokeValue, setStrokeValue] = useState<number>(3);
-    const [showMenu, setShowMenu] = useState<boolean>(false)
     const [eraser, setEraser] = useState<boolean>(false)
     const toolRef = useRef<any>(null);
-    const pencilRef = useRef<HTMLDivElement>(null)
+    const pencilRef = useRef<HTMLDivElement>(null);
+    const [tool, setTool] = useState<ToolsType>(initialTool);
 
     useOutsideClick(pencilRef, () => { setPencilFlag(false); setEraserFlag(false) })
 
-    const historyRef = useRef({
-        canvasState: [],
-        currentStateIndex: -1,
-        undoStatus: false,
-        redoStatus: false,
-        undoFinishedStatus: 1,
-        redoFinishedStatus: 1,
-    });
+ 
 
-    const handleClick = (title: string) => {
-        switch (title) {
-            case "Pencil":
-                setPencilFlag(!pencilFlag);
-                setEraser(false)
-                break;
-            case 'Eraser':
-                if (!eraser) {
-                    setEraserFlag(!eraserFlag);
-                }
-                setEraser(!eraser);
-                break;
-            case 'Download':
-                handleDownload()
-                return;
-            case 'Photo':
-                handleUpload();
-                return;
-            case 'Notes':
-                handleNotes();
-                return;
-            case 'Undo':
-                handleUndo();
-                return;
-            case 'Redo':
-                handleRedo();
-                return;
-        }
-    }
 
     useEffect(() => {
         if (eraser) {
@@ -121,6 +69,34 @@ function Draw() {
             setStrokeValue(pencilValue);
         }
     }, [eraser, pencilColor, pencilValue, eraserValue])
+
+    const handleClick = (title: string) => {
+        switch (title) {
+            case "pencil":
+                setPencilFlag(!pencilFlag);
+                setEraser(false)
+                break;
+            case 'eraser':
+                if (!eraser) {
+                    setEraserFlag(!eraserFlag);
+                }
+                setEraser(!eraser);
+                break;
+            case 'download':
+                handleDownload()
+                return;
+            case 'photo':
+                handleUpload();
+                return;
+            case 'notes':
+                handleNotes();
+                return;
+        }
+    }
+
+    useEffect(() => {
+        handleClick(tool)
+    }, [tool])
 
 
 
@@ -219,71 +195,45 @@ function Draw() {
 
 
 
-    const handleUndo = () => {
-        if (historyRef.current.undoFinishedStatus) {
-            console.log(historyRef.current)
-            if (historyRef.current.currentStateIndex == -1) {
-                historyRef.current.undoStatus = false;
-            }
-            else {
-                if (historyRef.current.canvasState.length >= 1) {
-                    historyRef.current.undoFinishedStatus = 0;
-                    if (historyRef.current.currentStateIndex != 0) {
-                        historyRef.current.undoStatus = true;
-                        undoRedoCanvas(historyRef.current.canvasState[historyRef.current.currentStateIndex - 1])
-                        historyRef.current.undoStatus = false;
-                        historyRef.current.currentStateIndex -= 1;
-                        historyRef.current.undoFinishedStatus = 1;
-                    }
-                    else if (historyRef.current.currentStateIndex == 0) {
-                        toolRef.current.reset()
-                    }
-                }
-            }
-        }
-
-    }
-
-
-    const handleRedo = () => {
-        if (historyRef.current.redoFinishedStatus) {
-            if ((historyRef.current.currentStateIndex == (historyRef.current.canvasState.length - 1)) && historyRef.current.currentStateIndex != -1) {
-                return;
-            } else {
-                if (historyRef.current.canvasState.length > historyRef.current.currentStateIndex && historyRef.current.canvasState.length != 0) {
-                    historyRef.current.redoFinishedStatus = 0;
-                    historyRef.current.redoStatus = true;
-                    undoRedoCanvas(historyRef.current.canvasState[historyRef.current.currentStateIndex + 1])
-                    historyRef.current.redoStatus = false;
-                    historyRef.current.currentStateIndex += 1;
-                    historyRef.current.redoFinishedStatus = 1;
-
-                };
-            }
-        }
-    }
-
     function undoRedoCanvas(url: any) {
-        let img = new Image(); // new image reference element
+        let img = new Image(); 
         img.src = url;
         img.onload = () => {
             toolRef.current.reset()
             toolRef?.current.drawImage(img, 0, 0, canvasRef.current.width, canvasRef.current.height);
         }
     }
+
+    const handleUndoredo = (e:KeyboardEvent) => {
+        if (e.ctrlKey) {
+
+            if (e.key == 'z') {
+                const val = undo(history);
+                undoRedoCanvas(val);
+            }
+            if (e.key == 'r') {
+                const val = redo(history);
+                undoRedoCanvas(val);
+            }
+        }
+    }
+
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            window.addEventListener('keydown',handleUndoredo)
+        
+            return () => {
+                window.removeEventListener('keydown', handleUndoredo)
+            }
+        }
+    }, [history])
+  
+
     return (
-        <>
-            <div className='p-4 bg-gray-200 z-10 w-12 h-12 flex absolute top-10 left-8 justify-center items-center'>
-                <img src={showMenu ? Cross : Menu} onClick={() => setShowMenu(!showMenu)} alt='icon' />
-            </div>
-            <div className=
-                {showMenu ? 'hidden' : 'animate-scaleTools flex w-[55vw] py-4 z-10 bg-white absolute h-24 top-8 left-[25vw] justify-around  border border-[#f1f2f6] shadow-3xl'}
-                ref={pencilRef}
-            >
-                {icons.map((icon) => <img key={icon.id} src={icon.icon} alt='icon' onMouseDown={() => handleClick(icon.id)}
-                    className={`${icon.id} cursor-pointer ${icon.id == "Eraser" && eraser && "border-2 border-black "}   w-16`} />)}
-            </div>
-            <div className={`${pencilFlag ? "block" : "hidden"} absolute z-10 py-4 px-2 left-[25vw] top-32 bg-white w-36 rounded shadow-3xl`}>
+        <div>
+            <ActionBar tool={tool} setTool={setTool} />
+
+            {/* <div className={`${pencilFlag ? "block" : "hidden"} absolute z-10 py-4 px-2 left-[25vw] top-32 bg-white w-36 rounded shadow-3xl`}>
                 <div className="h-8 flex justify-center items-center">
 
                     <Slider
@@ -300,11 +250,10 @@ function Draw() {
                     <div onClick={() => setPencilColor('red')} className="bg-red-500 w-[1.5rem] h-8 rounded-[50%] cursor-pointer"></div>
                     <div onClick={() => setPencilColor('blue')} className="bg-blue-500 w-[1.5rem] h-8 rounded-[50%] cursor-pointer"></div>
                 </div>
-            </div>
+            </div> */}
 
-            <div
-                className={`${eraserFlag ? "flex" : "hidden"} 
-         h-8 w-[6%] p-2 justify-center z-10 items-center absolute top-32 left-[35vw] bg-white shadow-3xl`}>
+            {/* <div
+                className={`${eraserFlag ? "flex" : "hidden"} h-8 w-[6%] p-2 justify-center z-10 items-center absolute top-32 left-[35vw] bg-white shadow-3xl`}>
                 <Slider
                     style={{ width: "80%" }}
                     min={2}
@@ -312,17 +261,17 @@ function Draw() {
                     value={eraserValue}
                     onChange={(e) => setEraserValue(Number((e.target as HTMLInputElement).value))}
                 />
-            </div>
+            </div> */}
 
             <Canvas
                 canvasRef={canvasRef}
                 toolRef={toolRef}
+                update={update}
                 strokeValue={strokeValue}
                 eraser={eraser}
                 strokeColor={strokeColor}
-                historyRef={historyRef}
             />
-        </>
+        </div>
     )
 }
 

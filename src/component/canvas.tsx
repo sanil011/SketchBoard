@@ -5,13 +5,11 @@ interface CanvasProps {
     toolRef: any;
     strokeValue: number;
     strokeColor: string;
-    historyRef: any;
     eraser: any;
+    update: any;
 }
 
-const Canvas: React.FC<CanvasProps> = ({ canvasRef, toolRef, strokeValue, strokeColor, historyRef,eraser }) => {
-
-
+const Canvas: React.FC<CanvasProps> = ({ canvasRef, toolRef, strokeValue, strokeColor,eraser,update }) => {
     const [mouse, setMouse] = useState(false);
 
     useEffect(() => {
@@ -87,28 +85,13 @@ const Canvas: React.FC<CanvasProps> = ({ canvasRef, toolRef, strokeValue, stroke
 
     const handleMouseup = () => {
         setMouse(false);
-
-        if ((historyRef.current.undoStatus == false && historyRef.current.redoStatus == false)) {
-            let url: any = canvasRef.current && canvasRef.current.toDataURL();
-            if (historyRef.current.currentStateIndex < historyRef.current.canvasState.length - 1) {
-                if (historyRef.current.currentStateIndex < 20) {
-                    return;
-                }
-                var indexToBeInserted = historyRef.current.currentStateIndex + 1;
-                historyRef.current.canvasState[indexToBeInserted] = url;
-                var numberOfElementsToRetain = indexToBeInserted + 1;
-                historyRef.current.canvasState = historyRef.current.canvasState.splice(0, numberOfElementsToRetain);
-            }
-            else {
-                if (historyRef.current.currentStateIndex >= 19) {
-                    historyRef.current.currentStateIndex -= 1;
-                    historyRef.current.canvasState.shift();
-                }
-                historyRef.current.canvasState.push(url);
-            }
-            historyRef.current.currentStateIndex = historyRef.current.canvasState.length - 1;
-        }
+        let url: string = canvasRef.current && canvasRef.current.toDataURL();
+        update(url);
     };
+    useEffect(() => {
+        let url: string = canvasRef.current && canvasRef.current.toDataURL();
+        update(url);
+    },[])
 
     return (
         <canvas
