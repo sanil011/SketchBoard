@@ -5,7 +5,6 @@ import useOutsideClick from '../hooks/useOutsideClick';
 import ActionBar from "../component/actionBar"
 import { Tools, ToolsType } from "../type"
 import useHistory from "../hooks/useHistory"
-import getStroke from "perfect-freehand";
 
 function dragAndDrop(element: HTMLElement | null, event: MouseEvent) {
 
