@@ -1,11 +1,11 @@
 import Canvas from "../component/canvas"
 import '../app.css';
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useLayoutEffect, MouseEvent } from 'react'
 import useOutsideClick from '../hooks/useOutsideClick';
 import ActionBar from "../component/actionBar"
 import { Tools, ToolsType } from "../type"
-import useHistory  from "../hooks/useHistory"
-
+import useHistory from "../hooks/useHistory"
+import getStroke from "perfect-freehand";
 
 function dragAndDrop(element: HTMLElement | null, event: MouseEvent) {
 
@@ -42,7 +42,7 @@ function dragAndDrop(element: HTMLElement | null, event: MouseEvent) {
 
 function Draw() {
     const initialTool: ToolsType = Tools.pencil;
-    const canvasRef = useRef<any>();
+    const [canvas, setCanvas] = useState<any>();
     const { undo, redo, update, history } = useHistory();
     const [pencilFlag, setPencilFlag] = useState<boolean>(false);
     const [pencilValue, setPencilValue] = useState<number>(5);
@@ -55,10 +55,123 @@ function Draw() {
     const toolRef = useRef<any>(null);
     const pencilRef = useRef<HTMLDivElement>(null);
     const [tool, setTool] = useState<ToolsType>(initialTool);
+    const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+    const [startPanMousePosition, setStartPanMousePosition] = useState({ x: 0, y: 0 });
+    const [scale, setScale] = useState(1);
+    const [mode, setMode] = useState('pencil');
+    const [scaleOffset, setScaleOffset] = useState({ x: 0, y: 0 });
+
 
     useOutsideClick(pencilRef, () => { setPencilFlag(false); setEraserFlag(false) })
 
- 
+    const getSvgPathFromStroke = (stroke: [number, number][]) => {
+        if (!stroke.length) return "";
+
+        const d = stroke.reduce(
+            (
+                acc: string[],
+                [x0, y0]: [number, number],
+                i: number,
+                arr: [number, number][]
+            ) => {
+                const [x1, y1] = arr[(i + 1) % arr.length];
+                acc.push(
+                    x0.toString(),
+                    y0.toString(),
+                    ((x0 + x1) / 2).toString(),
+                    ((y0 + y1) / 2).toString()
+                );
+                return acc;
+            },
+            ["M", ...stroke[0].map((num) => num.toString()), "Q"]
+        );
+
+        d.push("Z");
+        return d.join(" ");
+    };
+
+    useEffect(() => {
+        const canvas = document.getElementById("canvas") as HTMLCanvasElement;
+        setCanvas(canvas)
+        const context = canvas.getContext("2d") as CanvasRenderingContext2D;
+        toolRef.current = context;
+    },[])
+
+    useEffect(() => {
+       
+        if (toolRef.current && canvas) {
+            let context = toolRef.current;
+            context.clearRect(0, 0, canvas.width, canvas.height);
+    
+            const scaledWidth = canvas.width * scale;
+            const scaledHeight = canvas.height * scale;
+            const scaleOffsetX = (scaledWidth - canvas.width) / 2;
+            const scaleOffsetY = (scaledHeight - canvas.height) / 2;
+            setScaleOffset({ x: scaleOffsetX, y: scaleOffsetY });
+            
+            context.save();
+            context.translate(
+                panOffset.x * scale - scaleOffsetX,
+                panOffset.y * scale - scaleOffsetY
+            );
+            context.scale(scale, scale);
+            console.log(history)
+            context.restore();
+        }
+    }, [panOffset, scale,canvas]);
+
+//     useEffect(() => {
+//         if (mode == "eraser") {
+//             toolRef.current.globalCompositeOperation = "destination-out";
+//             toolRef.current.lineWidth = 5;
+//             history.canvasState.forEach((element) => {
+//                 toolRef.current.beginPath()
+//                 element?.points.map((db) => {
+//                     const [x, y] = db
+//                     toolRef.current.lineTo(x, y)
+//                 })
+//                 toolRef.current.stroke();
+//             })
+//         } else {
+//                 toolRef.current.globalCompositeOperation = "source-over";
+//                 toolRef.current.strokeStyle = "#000";
+//                 toolRef.current.lineWidth = 5;
+//                 history.canvasState.forEach((element) => {
+//                 toolRef.current.beginPath()
+//                 element?.points.map((db) => {
+//                     const [x, y] = db
+//                     toolRef.current.lineTo(x, y)
+//                 })
+//                 toolRef.current.stroke();
+//             });
+//             }
+// },[mode])
+
+    const onZoom = (delta: number) => {
+        setScale((prevState) => Math.min(Math.max(prevState + delta, 0.1), 20));
+    };
+
+    useEffect(() => {
+        const panOrZoomFunction = (event: WheelEvent) => {
+            if (event.ctrlKey) {
+                onZoom(event.deltaY * -0.01);
+            } else {
+                setPanOffset((prevState) => ({
+                    x: prevState.x - event.deltaX,
+                    y: prevState.y - event.deltaY,
+                }));
+            }
+        };
+
+        document.addEventListener("wheel", panOrZoomFunction);
+        return () => {
+            document.removeEventListener("wheel", panOrZoomFunction);
+        };
+    }, []);
+
+
+
+
 
 
     useEffect(() => {
@@ -73,13 +186,11 @@ function Draw() {
     const handleClick = (title: string) => {
         switch (title) {
             case "pencil":
-                setPencilFlag(!pencilFlag);
+                setMode("pencil");
                 setEraser(false)
                 break;
             case 'eraser':
-                if (!eraser) {
-                    setEraserFlag(!eraserFlag);
-                }
+                setMode("eraser");
                 setEraser(!eraser);
                 break;
             case 'download':
@@ -106,7 +217,7 @@ function Draw() {
     }
 
     const handleDownload = (): void => {
-        const url = canvasRef?.current?.toDataURL();
+        const url = canvas?.toDataURL();
         if (url) {
             const a = document.createElement("a");
             a.href = url;
@@ -196,15 +307,15 @@ function Draw() {
 
 
     function undoRedoCanvas(url: any) {
-        let img = new Image(); 
+        let img = new Image();
         img.src = url;
         img.onload = () => {
             toolRef.current.reset()
-            toolRef?.current.drawImage(img, 0, 0, canvasRef.current.width, canvasRef.current.height);
+            toolRef?.current.drawImage(img, 0, 0, canvas.width, canvas.height);
         }
     }
 
-    const handleUndoredo = (e:KeyboardEvent) => {
+    const handleUndoredo = (e: KeyboardEvent) => {
         if (e.ctrlKey) {
 
             if (e.key == 'z') {
@@ -219,15 +330,96 @@ function Draw() {
     }
 
     useEffect(() => {
-        if (typeof window !== "undefined") {
-            window.addEventListener('keydown',handleUndoredo)
-        
+        if (canvas) {
+            canvas.addEventListener('keydown', handleUndoredo)
+
             return () => {
-                window.removeEventListener('keydown', handleUndoredo)
+                canvas.removeEventListener('keydown', handleUndoredo)
             }
         }
-    }, [history])
-  
+    }, [canvas, history])
+    const [mouse, setMouse] = useState(false);
+
+
+
+    useEffect(() => {
+        if (toolRef.current) {
+            toolRef.current.lineWidth = +strokeValue;
+            toolRef.current.strokeStyle = strokeColor;
+        }
+    }, [strokeValue, strokeColor]);
+
+
+
+    const updateElement = (element: any) => {
+        let copy = [...history.canvasState];
+        const existingPoints = copy[element.id - 1].points || [];
+        copy[element.id - 1].points = [...existingPoints, [...element.points[0]]];
+        console.log(copy)
+        update(copy[element.id - 1], true)
+    }
+
+    const getMouseCordinate = (event:MouseEvent) => {
+        const clientX = (event.clientX - panOffset.x * scale + scaleOffset.x) / scale;
+        const clientY = (event.clientY - panOffset.y * scale + scaleOffset.y) / scale;
+        return { clientX, clientY };
+    }
+    const beginPath = (strokeObj: { x: number; y: number }) => {
+        if (toolRef.current) {
+            if (eraser) {
+                toolRef.current.globalCompositeOperation = "destination-out";
+                toolRef.current.beginPath();
+                toolRef.current.moveTo(strokeObj.x, strokeObj.y);
+            } else {
+                toolRef.current.globalCompositeOperation = "source-over";
+                toolRef.current.beginPath();
+                toolRef.current.moveTo(strokeObj.x, strokeObj.y);
+            }
+        }
+    };
+
+
+    const handleMousedown = (e: MouseEvent<HTMLCanvasElement>) => {
+        setMouse(true);
+        const { clientX, clientY } = getMouseCordinate(e);
+        beginPath({ x: clientX, y: clientY});
+        if (e.shiftKey) {
+            setStartPanMousePosition({ x: clientX, y: clientY });
+            return;
+        };
+        const id = history.canvasState.length;
+        const element = { id, points: [[clientX, clientY ]] };
+        console.log(element)
+        update(element);
+    };
+
+
+    const handleMousemove = (e: MouseEvent<HTMLCanvasElement>) => {
+        if (mouse) {
+            const { clientX, clientY } = getMouseCordinate(e);
+            if (e.shiftKey) {
+                const deltaX = clientX - startPanMousePosition.x;
+                const deltaY = clientY - startPanMousePosition.y;
+                setPanOffset({
+                    x: panOffset.x + deltaX,
+                    y: panOffset.y + deltaY,
+                });
+            } else {
+                const id = history.canvasState.length;
+                // const element = { id, points: [[clientX,  clientY]] };
+                // updateElement(element);
+                toolRef.current.globalCompositeOperation = "source-over";
+                toolRef.current.strokeStyle = "#000";
+                toolRef.current.lineWidth = 4;
+                toolRef.current.lineTo(clientX , clientY);
+                toolRef.current.stroke();
+            }
+        }
+    };
+
+    const handleMouseup = () => {
+        setMouse(false);
+    };
 
     return (
         <div>
@@ -263,14 +455,16 @@ function Draw() {
                 />
             </div> */}
 
-            <Canvas
-                canvasRef={canvasRef}
-                toolRef={toolRef}
-                update={update}
-                strokeValue={strokeValue}
-                eraser={eraser}
-                strokeColor={strokeColor}
-            />
+            <canvas
+                id="canvas"
+                onMouseDown={handleMousedown}
+                onMouseMove={handleMousemove}
+                onMouseUp={handleMouseup}
+                width={window.innerWidth}
+                height={window.innerHeight}
+                className="cursor-pointer"
+                // style={{ position: "absolute", zIndex: "1" }}
+            ></canvas>
         </div>
     )
 }

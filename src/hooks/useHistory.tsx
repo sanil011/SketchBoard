@@ -11,21 +11,26 @@ const useHistory = () => {
     currentStateIndex: -1,
   });
 
-
-  const update = (url: string) => {
-    setHistory((prev:historyProps) => {
-      const newCanvasState = prev.canvasState.slice(0, prev.currentStateIndex + 1);
-      newCanvasState.push(url);
-      console.log({
-        canvasState: newCanvasState,
-        currentStateIndex: newCanvasState.length - 1,
+  
+  const update = (element:any, overwrite = false) => {
+    if (overwrite) {
+      const copy = [...history.canvasState];
+      copy[element.id - 1] = element;
+      const copyState = history.currentStateIndex;
+      setHistory({
+        canvasState: copy,
+        currentStateIndex:copyState
       })
-      return {
-        canvasState: newCanvasState,
-        currentStateIndex: newCanvasState.length - 1,
-      };
-    });
-    console.log(history)
+    } else {   
+      setHistory((prev:historyProps) => {
+        const newCanvasState = prev.canvasState.slice(0, prev.currentStateIndex + 1);
+        newCanvasState.push(element);
+        return {
+          canvasState: newCanvasState,
+          currentStateIndex: newCanvasState.length - 1,
+        };
+      });
+    }
   }
 
   const undo = (history:historyProps) => {
@@ -42,8 +47,6 @@ const useHistory = () => {
       }));
 
       return url;
-
-
   };
 
   const redo = (history:historyProps) => {

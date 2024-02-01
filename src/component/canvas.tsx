@@ -1,26 +1,27 @@
 import { useState, MouseEvent, useEffect } from "react";
 
 interface CanvasProps {
-    canvasRef: React.MutableRefObject<HTMLCanvasElement>;
+    canvas: React.MutableRefObject<HTMLCanvasElement>;
     toolRef: any;
     strokeValue: number;
     strokeColor: string;
     eraser: any;
     update: any;
+    history: any;
 }
 
-const Canvas: React.FC<CanvasProps> = ({ canvasRef, toolRef, strokeValue, strokeColor,eraser,update }) => {
+const Canvas: React.FC<CanvasProps> = ({ canvas, toolRef, strokeValue, strokeColor,eraser,update,history }) => {
     const [mouse, setMouse] = useState(false);
 
-    useEffect(() => {
-        const data = canvasRef?.current?.getContext("2d");
-        if (data) {
-            toolRef.current = data;
-        } else {
-            toolRef.current = null;
-        }
+    // useEffect(() => {
+    //     const data = canvas?.current?.getContext("2d");
+    //     if (data) {
+    //         toolRef.current = data;
+    //     } else {
+    //         toolRef.current = null;
+    //     }
 
-    }, [canvasRef.current]);
+    // }, [canvas.current]);
 
 
     useEffect(() => {
@@ -56,12 +57,14 @@ const Canvas: React.FC<CanvasProps> = ({ canvasRef, toolRef, strokeValue, stroke
                 toolRef.current.lineWidth = strokeObj.width;
                 toolRef.current.lineTo(strokeObj.x, strokeObj.y);
                 toolRef.current.stroke();
+                console.log("sanil")
             } else {
                 toolRef.current.globalCompositeOperation = "source-over";
                 toolRef.current.strokeStyle = strokeObj.color;
                 toolRef.current.lineWidth = strokeObj.width;
                 toolRef.current.lineTo(strokeObj.x, strokeObj.y);
                 toolRef.current.stroke();
+                console.log("sanil shreya")
             }
         }
     };
@@ -69,7 +72,11 @@ const Canvas: React.FC<CanvasProps> = ({ canvasRef, toolRef, strokeValue, stroke
     const handleMousedown = (e: MouseEvent<HTMLCanvasElement>) => {
         setMouse(true);
         beginPath({ x: e.nativeEvent.offsetX, y: e.nativeEvent.offsetY });
+        const id = history.canvasState.length;
+        const element = {id, url:canvas.toDataURL() };
+        update(element)
     };
+
 
     const handleMousemove = (e: MouseEvent<HTMLCanvasElement>) => {
         if (mouse) {
@@ -80,28 +87,32 @@ const Canvas: React.FC<CanvasProps> = ({ canvasRef, toolRef, strokeValue, stroke
                 width: +strokeValue,
             };
             drawStroke(data);
+            const id = history.canvasState.length;
+            const element = { id, url: canvas.toDataURL() };
+            update(element)
         }
     };
 
     const handleMouseup = () => {
         setMouse(false);
-        let url: string = canvasRef.current && canvasRef.current.toDataURL();
-        update(url);
+        // let url: string = canvas.current && canvas.current.toDataURL();
+        // update(url);
     };
-    useEffect(() => {
-        let url: string = canvasRef.current && canvasRef.current.toDataURL();
-        update(url);
-    },[])
+    // useEffect(() => {
+    //     let url: string = canvas.current && canvas.current.toDataURL();
+    //     update(url);
+    // },[])
 
     return (
         <canvas
-            ref={canvasRef}
+            id="canvas"
             onMouseDown={handleMousedown}
             onMouseMove={handleMousemove}
             onMouseUp={handleMouseup}
             width={window.innerWidth}
             height={window.innerHeight}
             className="cursor-pointer"
+            style={{position:"absolute",zIndex:}}
         ></canvas>
     );
 };
