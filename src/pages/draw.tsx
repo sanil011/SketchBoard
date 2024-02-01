@@ -120,32 +120,6 @@ function Draw() {
         }
     }, [panOffset, scale,canvas]);
 
-//     useEffect(() => {
-//         if (mode == "eraser") {
-//             toolRef.current.globalCompositeOperation = "destination-out";
-//             toolRef.current.lineWidth = 5;
-//             history.canvasState.forEach((element) => {
-//                 toolRef.current.beginPath()
-//                 element?.points.map((db) => {
-//                     const [x, y] = db
-//                     toolRef.current.lineTo(x, y)
-//                 })
-//                 toolRef.current.stroke();
-//             })
-//         } else {
-//                 toolRef.current.globalCompositeOperation = "source-over";
-//                 toolRef.current.strokeStyle = "#000";
-//                 toolRef.current.lineWidth = 5;
-//                 history.canvasState.forEach((element) => {
-//                 toolRef.current.beginPath()
-//                 element?.points.map((db) => {
-//                     const [x, y] = db
-//                     toolRef.current.lineTo(x, y)
-//                 })
-//                 toolRef.current.stroke();
-//             });
-//             }
-// },[mode])
 
     const onZoom = (delta: number) => {
         setScale((prevState) => Math.min(Math.max(prevState + delta, 0.1), 20));
