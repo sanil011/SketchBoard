@@ -12,7 +12,7 @@ type ActionBarProps = {
 
 const ActionBar = ({ tool, setTool }: ActionBarProps) => {
   return (
-      <div className="fixed left-[50%] z-10 top-5 flex justify-center translate-x-[-50%] border-2 rounded-lg p-3 gap-5">
+      <div className="fixed left-[50%] z-10 top-5 flex justify-center translate-x-[-50%] border-2 rounded-lg p-2 gap-5 bg-white">
           {Object.values(Tools).map((t, index) => (
               <div
                   className={`relative cursor-pointer p-3 rounded-md transition-[background] hover:bg-[#e7e1fe] ${tool === t ? "bg-[#b3a1fc]" : "bg-white"}`}
