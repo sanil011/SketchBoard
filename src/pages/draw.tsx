@@ -42,7 +42,7 @@ function dragAndDrop(element: HTMLElement | null, event: MouseEvent) {
 
 function Draw() {
     const initialTool: ToolsType = Tools.pencil;
-    const { undo, redo, update, history } = useHistory();
+    const { undo, redo, setUpdate, history, index } = useHistory();
     const [pencilValue, setPencilValue] = useState<number>(5);
     const [pencilColor, setPencilColor] = useState<string>('black');
     const [eraserValue, setEraserValue] = useState<number>(7);
@@ -57,6 +57,7 @@ function Draw() {
     const [mode, setMode] = useState('pencil');
     const [scaleOffset, setScaleOffset] = useState({ x: 0, y: 0 });
     const [pencilHandle, setPencilHandle] = useState<HTMLElement | null>(null);
+    const mouseRef = useRef<boolean>(false)
 
 
     useLayoutEffect(() => {
@@ -79,10 +80,10 @@ function Draw() {
             panOffset.y * scale - scaleOffsetY
         );
         context.scale(scale, scale);
-        console.log(history)
-        history?.canvasState?.map((db) => {
+        history?.forEach((db) => {
             context.beginPath();
             context.moveTo(db.points[0].x, db.points[0].y);
+
             for (let i = 1; i < db.points.length; i++) {
                 context.lineTo(db.points[i].x, db.points[i].y);
             }
@@ -116,6 +117,24 @@ function Draw() {
             document.removeEventListener("wheel", panOrZoomFunction);
         };
     }, []);
+
+    useEffect(() => { console.log(history, index), [index] })
+
+    const handleUndoRedo = (e) => {
+        if (e.ctrlKey && e.key == "z") {
+            undo();
+        }
+        if (e.ctrlKey && (e.key == "r" || e.key == "R")) {
+            redo()
+        }
+    }
+
+    useEffect(() => {
+        document.addEventListener("keydown",handleUndoRedo)
+        return () => {
+            document.removeEventListener("keydown", handleUndoRedo)
+        }
+    }, [undo,redo])
 
 
     const handleClick = (title: string) => {
@@ -236,12 +255,6 @@ function Draw() {
 
     const [mouse, setMouse] = useState(false);
 
-    const updateElement = (element: any) => {
-        let copy = [...history.canvasState];
-        const existingPoints = copy[element.id - 1].points || [];
-        copy[element.id - 1].points = [...existingPoints, element.points[0]];
-        update(copy[element.id - 1], true)
-    }
 
     const getMouseCordinate = (event: MouseEvent) => {
         const clientX = (event.clientX - panOffset.x * scale + scaleOffset.x) / scale;
@@ -249,22 +262,28 @@ function Draw() {
         return { clientX, clientY };
     }
 
+    const updateElement = (newElement: any) => {
+        let copy = [...history];
+        const existingPoints = copy[newElement.id].points || [];
+        copy[newElement.id].points = [...existingPoints, ...newElement.points];
+        setUpdate(copy, true);
+    }
 
     const handleMousedown = (e: MouseEvent<HTMLCanvasElement>) => {
-        setMouse(true);
+        mouseRef.current = true;
         const { clientX, clientY } = getMouseCordinate(e);
         if (e.shiftKey) {
             setStartPanMousePosition({ x: clientX, y: clientY });
             return;
         };
-        const id = history.canvasState.length;
-        const element = eraser ? { id, points: [{ x: clientX, y: clientY }], color: "#ffffff" } : { id, points: [{ x: clientX, y: clientY }], color: pencilColor };
-        update(element);
+        const id = history.length;
+        const newElement = eraser ? { id, points: [{ x: clientX, y: clientY }], color: "#ffffff" } : { id, points: [{ x: clientX, y: clientY }], color: pencilColor };
+        setUpdate((prev) => [...prev, newElement]);
     };
 
 
     const handleMousemove = (e: MouseEvent<HTMLCanvasElement>) => {
-        if (mouse) {
+        if (mouseRef.current) {
             const { clientX, clientY } = getMouseCordinate(e);
             if (e.shiftKey) {
                 const deltaX = clientX - startPanMousePosition.x;
@@ -274,15 +293,15 @@ function Draw() {
                     y: panOffset.y + deltaY,
                 });
             } else {
-                const id = history.canvasState.length;
-                const element = eraser ? { id, points: [{ x: clientX, y: clientY }], color: "#ffffff" } : { id, points: [{ x: clientX, y: clientY }], color: pencilColor };
-                updateElement(element);
+                const id = history.length - 1;
+                const newElement = eraser ? { id, points: [{ x: clientX, y: clientY }], color: "#ffffff" } : { id, points: [{ x: clientX, y: clientY }], color: pencilColor };
+                updateElement(newElement);
             }
         }
     };
 
     const handleMouseup = () => {
-        setMouse(false);
+        mouseRef.current = false;
     };
 
     return (

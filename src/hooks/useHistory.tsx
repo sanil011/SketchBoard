@@ -1,74 +1,36 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
 import { useState } from 'react'
-
-interface historyProps{
-  canvasState: string[];
-  currentStateIndex:number
-}
+// interface historyProps{
+//   canvasState: string[];
+//   currentStateIndex:number
+// }
 const useHistory = () => {
 
-  const [history, setHistory] = useState<historyProps>({
-    canvasState: [],
-    currentStateIndex: -1,
-  });
-
+  const [history, setHistory] = useState([[]]);
+  const [index, setIndex] = useState(0);
   
-  const update = (element:any, overwrite = false) => {
+  const setUpdate = (element, overwrite=false) => {
+    const newElement = typeof element == "function" ? element(history[index]) : element;
+
     if (overwrite) {
-      const copy = [...history.canvasState];
-      copy[element.id - 1] = element;
-      const copyState = history.currentStateIndex;
-      setHistory({
-        canvasState: copy,
-        currentStateIndex:copyState
-      })
-    } else {   
-      setHistory((prev:historyProps) => {
-        const newCanvasState = prev.canvasState.slice(0, prev.currentStateIndex + 1);
-        newCanvasState.push(element);
-        return {
-          canvasState: newCanvasState,
-          currentStateIndex: newCanvasState.length - 1,
-        };
-      });
+      const historyCopy = [...history].slice(0, index + 1);
+      historyCopy[index] = newElement;
+      setHistory(historyCopy);
+    } else {
+      const updatedState = [...history].slice(0, index + 1);
+      setHistory([...updatedState, newElement]);
+      setIndex((prevState) => prevState + 1);
     }
   }
 
-  const undo = (history:historyProps) => {
-      if (history.currentStateIndex <= 0) {
-        return null;
-      }
-
-      const newIndex = history.currentStateIndex - 1;
-      const url = history.canvasState[newIndex];
-
-      setHistory(prev => ({
-        ...prev, // This line preserves the existing canvasState
-        currentStateIndex: newIndex,
-      }));
-
-      return url;
-  };
-
-  const redo = (history:historyProps) => {
-    if (history.currentStateIndex >= history.canvasState.length - 1) {
-      return null;
-    }
-
-    const newIndex = history.currentStateIndex + 1;
-    const url = history.canvasState[newIndex];
-
-    setHistory(prev => ({
-      ...prev,
-      currentStateIndex: newIndex,
-    }));
-
-    return url;
-  };
+  const undo = () => index > 0 && setIndex((prevState) => prevState - 1);
+  const redo = () => index < history.length - 1 && setIndex((prevState) => prevState + 1);
 
 
   return {
-    history,
-    update,
+    history:history[index],
+    setUpdate,
     undo,
     redo
   }
