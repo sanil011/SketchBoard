@@ -13,6 +13,7 @@
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@nextui-org/react": "^2.2.9",
+    "@tippyjs/react": "^4.2.6",
     "framer-motion": "^10.18.0",
     "gsap": "^3.12.2",
     "perfect-freehand": "^1.2.0",

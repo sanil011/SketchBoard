@@ -1,13 +1,15 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 import '../app.css';
-import { useEffect, useState, useRef, useLayoutEffect, MouseEvent } from 'react'
+import { useEffect, useState,useLayoutEffect, MouseEvent } from 'react'
 import ActionBar from "../component/actionBar"
 import { Tools, ToolsType } from "../type"
 import useHistory from "../hooks/useHistory"
 import ControlPanel from '../component/controlPanel';
-
-function dragAndDrop(element: HTMLElement | null, event: MouseEvent) {
+import StyleBar from '../component/styleBar';
+import { RxQuestionMarkCircled } from "react-icons/rx";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDisclosure } from "@nextui-org/react";
+function dragAndDrop(element: HTMLElement | null, event: MouseEvent<Element, MouseEvent<Element, MouseEvent>>) {
 
     if (!element) return;
 
@@ -42,28 +44,26 @@ function dragAndDrop(element: HTMLElement | null, event: MouseEvent) {
 
 function Draw() {
     const initialTool: ToolsType = Tools.pencil;
-    const { undo, redo, setUpdate, history, index } = useHistory();
-    const [pencilValue, setPencilValue] = useState<number>(5);
-    const [pencilColor, setPencilColor] = useState<string>('black');
+    const { undo, redo, setUpdate, history } = useHistory();
+    const [strokeValue, setStrokeValue] = useState<number>(5);
+    const [strokeColor, setStrokeColor] = useState<string>('#000000');
     const [eraserValue, setEraserValue] = useState<number>(7);
-    const [strokeColor, setStrokeColor] = useState<string>('red');
-    const [strokeValue, setStrokeValue] = useState<number>(3);
     const [eraser, setEraser] = useState<boolean>(false)
-    const pencilRef = useRef<HTMLDivElement>(null);
     const [tool, setTool] = useState<ToolsType>(initialTool);
     const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
     const [startPanMousePosition, setStartPanMousePosition] = useState({ x: 0, y: 0 });
     const [scale, setScale] = useState(1);
-    const [mode, setMode] = useState('pencil');
     const [scaleOffset, setScaleOffset] = useState({ x: 0, y: 0 });
     const [pencilHandle, setPencilHandle] = useState<HTMLElement | null>(null);
-    const mouseRef = useRef<boolean>(false)
-
+    const [mouse, setMouse] = useState<boolean>(false);
+    const [canvas, setCanvas] = useState<HTMLCanvasElement | null>(null);
+    const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
     useLayoutEffect(() => {
         const pencil = document.getElementById("pencil");
         setPencilHandle(pencil)
         const canvas = document.getElementById("canvas") as HTMLCanvasElement;
+        setCanvas(canvas);
         const context = canvas.getContext("2d") as CanvasRenderingContext2D;
         context.clearRect(0, 0, canvas.width, canvas.height);
         const scaledWidth = canvas.width * scale;
@@ -82,13 +82,13 @@ function Draw() {
         context.scale(scale, scale);
         history?.forEach((db) => {
             context.beginPath();
-            context.moveTo(db.points[0].x, db.points[0].y);
+            context.moveTo(db?.points[0].x, db?.points[0].y);
 
-            for (let i = 1; i < db.points.length; i++) {
-                context.lineTo(db.points[i].x, db.points[i].y);
+            for (let i = 1; i < db?.points.length; i++) {
+                context.lineTo(db?.points[i].x, db?.points[i].y);
             }
-            context.strokeStyle = db.color;
-            context.lineWidth = pencilValue;
+            context.strokeStyle = db?.color;
+            context.lineWidth = db?.value;
             context.stroke()
         })
         context.restore();
@@ -99,29 +99,28 @@ function Draw() {
     const onZoom = (delta: number) => {
         setScale((prevState) => Math.min(Math.max(prevState + delta, 0.1), 20));
     };
+    
 
+    const panOrZoomFunction = (event: WheelEvent) => {
+        if (event.ctrlKey) {
+            onZoom(event.deltaY * -0.01);
+        } else {
+            setPanOffset((prevState) => ({
+                x: prevState.x - event.deltaX,
+                y: prevState.y - event.deltaY,
+            }));
+        }
+    };
     useEffect(() => {
-        const panOrZoomFunction = (event: WheelEvent) => {
-            if (event.ctrlKey) {
-                onZoom(event.deltaY * -0.01);
-            } else {
-                setPanOffset((prevState) => ({
-                    x: prevState.x - event.deltaX,
-                    y: prevState.y - event.deltaY,
-                }));
-            }
-        };
-
         document.addEventListener("wheel", panOrZoomFunction);
         return () => {
             document.removeEventListener("wheel", panOrZoomFunction);
         };
     }, []);
 
-    useEffect(() => { console.log(history, index), [index] })
 
-    const handleUndoRedo = (e) => {
-        if (e.ctrlKey && e.key == "z") {
+    const handleUndoRedo = (e:KeyboardEvent) => {
+        if (e.ctrlKey && (e.key == "z" || e.key == "Z")) {
             undo();
         }
         if (e.ctrlKey && (e.key == "r" || e.key == "R")) {
@@ -140,7 +139,6 @@ function Draw() {
     const handleClick = (title: string) => {
         switch (title) {
             case "pencil":
-                setMode("pencil");
                 setEraser(false)
                 break;
             case 'eraser':
@@ -253,8 +251,6 @@ function Draw() {
         })
     }
 
-    const [mouse, setMouse] = useState(false);
-
 
     const getMouseCordinate = (event: MouseEvent) => {
         const clientX = (event.clientX - panOffset.x * scale + scaleOffset.x) / scale;
@@ -270,20 +266,20 @@ function Draw() {
     }
 
     const handleMousedown = (e: MouseEvent<HTMLCanvasElement>) => {
-        mouseRef.current = true;
+        setMouse(true)
         const { clientX, clientY } = getMouseCordinate(e);
         if (e.shiftKey) {
             setStartPanMousePosition({ x: clientX, y: clientY });
             return;
         };
         const id = history.length;
-        const newElement = eraser ? { id, points: [{ x: clientX, y: clientY }], color: "#ffffff" } : { id, points: [{ x: clientX, y: clientY }], color: pencilColor };
+        const newElement = eraser ? { id, points: [{ x: clientX, y: clientY }], color: "#ffffff", value: eraserValue } : { id, points: [{ x: clientX, y: clientY }], color: strokeColor, value:strokeValue };
         setUpdate((prev) => [...prev, newElement]);
     };
 
 
     const handleMousemove = (e: MouseEvent<HTMLCanvasElement>) => {
-        if (mouseRef.current) {
+        if (mouse) {
             const { clientX, clientY } = getMouseCordinate(e);
             if (e.shiftKey) {
                 const deltaX = clientX - startPanMousePosition.x;
@@ -294,20 +290,72 @@ function Draw() {
                 });
             } else {
                 const id = history.length - 1;
-                const newElement = eraser ? { id, points: [{ x: clientX, y: clientY }], color: "#ffffff" } : { id, points: [{ x: clientX, y: clientY }], color: pencilColor };
+                const newElement = eraser ? { id, points: [{ x: clientX, y: clientY }], color: "#ffffff", value: eraserValue } : { id, points: [{ x: clientX, y: clientY }], color: strokeColor, value:strokeValue };
                 updateElement(newElement);
             }
         }
     };
 
     const handleMouseup = () => {
-        mouseRef.current = false;
+        setMouse(false)
     };
 
     return (
         <div>
             <ActionBar tool={tool} setTool={setTool} />
-            <ControlPanel />
+            <ControlPanel scale={scale} setScale={setScale} onZoom={onZoom} undo={undo} redo={redo} />
+            <StyleBar
+                strokeColor={strokeColor}
+                setStrokeColor={setStrokeColor}
+                setStrokeValue={setStrokeValue}
+                strokeValue={strokeValue}
+                eraserValue={eraserValue}
+                setEraserValue={setEraserValue}
+            />
+            {/* <div className="bg-[#e7e1fe] p-2 fixed right-10 top-[94%] rounded-lg flex justify-center items-center">
+                <button onClick={onOpen}>
+                    <RxQuestionMarkCircled className="text-xl" />
+                </button>
+            </div> */}
+
+
+            <Modal size="sm" isOpen={isOpen} onOpenChange={onOpenChange}>
+                <ModalContent>
+                    {(onClose) => (
+                        <>
+                            <ModalHeader className="flex flex-col gap-1">Modal Title</ModalHeader>
+                            <ModalBody>
+                                <p>
+                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                                    Nullam pulvinar risus non risus hendrerit venenatis.
+                                    Pellentesque sit amet hendrerit risus, sed porttitor quam.
+                                </p>
+                                <p>
+                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                                    Nullam pulvinar risus non risus hendrerit venenatis.
+                                    Pellentesque sit amet hendrerit risus, sed porttitor quam.
+                                </p>
+                                <p>
+                                    Magna exercitation reprehenderit magna aute tempor cupidatat consequat elit
+                                    dolor adipisicing. Mollit dolor eiusmod sunt ex incididunt cillum quis.
+                                    Velit duis sit officia eiusmod Lorem aliqua enim laboris do dolor eiusmod.
+                                    Et mollit incididunt nisi consectetur esse laborum eiusmod pariatur
+                                    proident Lorem eiusmod et. Culpa deserunt nostrud ad veniam.
+                                </p>
+                            </ModalBody>
+                            <ModalFooter>
+                                <Button color="danger" variant="light" onPress={onClose}>
+                                    Close
+                                </Button>
+                                <Button color="primary" onPress={onClose}>
+                                    Action
+                                </Button>
+                            </ModalFooter>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
+        
             <canvas
                 id="canvas"
                 onMouseDown={handleMousedown}
@@ -316,7 +364,6 @@ function Draw() {
                 width={window.innerWidth}
                 height={window.innerHeight}
                 className="cursor-pointer bg-white"
-            // style={{ position: "absolute", zIndex: "1" }}
             ></canvas>
         </div>
     )

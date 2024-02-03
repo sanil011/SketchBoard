@@ -1,16 +1,11 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
 import { useState } from 'react'
-// interface historyProps{
-//   canvasState: string[];
-//   currentStateIndex:number
-// }
+
 const useHistory = () => {
 
   const [history, setHistory] = useState([[]]);
   const [index, setIndex] = useState(0);
   
-  const setUpdate = (element, overwrite=false) => {
+  const setUpdate = (element:any, overwrite=false) => {
     const newElement = typeof element == "function" ? element(history[index]) : element;
 
     if (overwrite) {
