@@ -2,11 +2,8 @@ import { RiSubtractFill } from "react-icons/ri";
 import { IoMdAdd } from "react-icons/io";
 import { GrUndo } from "react-icons/gr";
 import { GrRedo } from "react-icons/gr";
-import { RxQuestionMarkCircled } from "react-icons/rx";
 import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css';
-// import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDisclosure } from "@nextui-org/react";
-
 
 interface controlPanelProps{
   scale: number;

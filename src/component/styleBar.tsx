@@ -16,8 +16,8 @@ const StyleBar = ({ strokeColor,setStrokeColor, setStrokeValue, strokeValue,eras
           <div className="flex items-center justify-between">
           <div className="flex gap-2 my-2">     
                   {colors?.map((color) => 
-                      <div className={`w-5 h-5 flex justify-center items-center rounded-sm  ${strokeColor == color ? "border border-blue-500  " : "border"}`}>            
-              <button onClick={() => setStrokeColor(color)} key={color} style={{ backgroundColor: color }} className={`w-4 h-4 rounded-sm`}>
+                      <div key={color} className={`w-5 h-5 flex justify-center items-center rounded-sm  ${strokeColor == color ? "border border-blue-500  " : "border"}`}>            
+              <button onClick={() => setStrokeColor(color)} style={{ backgroundColor: color }} className={`w-4 h-4 rounded-sm`}>
                   </button>
               </div>
               )

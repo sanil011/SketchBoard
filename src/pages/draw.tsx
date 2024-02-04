@@ -119,13 +119,20 @@ function Draw() {
     }, []);
 
 
-    const handleUndoRedo = (e:KeyboardEvent) => {
+    const handleUndoRedo = (e: KeyboardEvent) => {
         if (e.ctrlKey && (e.key == "z" || e.key == "Z")) {
             undo();
         }
         if (e.ctrlKey && (e.key == "r" || e.key == "R")) {
             redo()
         }
+        if (e.ctrlKey && e.key == "=" ) {
+            onZoom(0.1)
+        }
+        if (e.ctrlKey && e.key == "-" ) {
+            onZoom(-0.1)
+        }
+       
     }
 
     useEffect(() => {
@@ -302,6 +309,7 @@ function Draw() {
 
     return (
         <div>
+            
             <ActionBar tool={tool} setTool={setTool} />
             <ControlPanel scale={scale} setScale={setScale} onZoom={onZoom} undo={undo} redo={redo} />
             <StyleBar
@@ -312,49 +320,11 @@ function Draw() {
                 eraserValue={eraserValue}
                 setEraserValue={setEraserValue}
             />
-            {/* <div className="bg-[#e7e1fe] p-2 fixed right-10 top-[94%] rounded-lg flex justify-center items-center">
-                <button onClick={onOpen}>
+            <div className="bg-[#e7e1fe] p-2 fixed right-10 top-[94%] rounded-lg flex justify-center items-center">
+                <button onClick={()=>onOpen()}>
                     <RxQuestionMarkCircled className="text-xl" />
                 </button>
-            </div> */}
-
-
-            <Modal size="sm" isOpen={isOpen} onOpenChange={onOpenChange}>
-                <ModalContent>
-                    {(onClose) => (
-                        <>
-                            <ModalHeader className="flex flex-col gap-1">Modal Title</ModalHeader>
-                            <ModalBody>
-                                <p>
-                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                                    Nullam pulvinar risus non risus hendrerit venenatis.
-                                    Pellentesque sit amet hendrerit risus, sed porttitor quam.
-                                </p>
-                                <p>
-                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                                    Nullam pulvinar risus non risus hendrerit venenatis.
-                                    Pellentesque sit amet hendrerit risus, sed porttitor quam.
-                                </p>
-                                <p>
-                                    Magna exercitation reprehenderit magna aute tempor cupidatat consequat elit
-                                    dolor adipisicing. Mollit dolor eiusmod sunt ex incididunt cillum quis.
-                                    Velit duis sit officia eiusmod Lorem aliqua enim laboris do dolor eiusmod.
-                                    Et mollit incididunt nisi consectetur esse laborum eiusmod pariatur
-                                    proident Lorem eiusmod et. Culpa deserunt nostrud ad veniam.
-                                </p>
-                            </ModalBody>
-                            <ModalFooter>
-                                <Button color="danger" variant="light" onPress={onClose}>
-                                    Close
-                                </Button>
-                                <Button color="primary" onPress={onClose}>
-                                    Action
-                                </Button>
-                            </ModalFooter>
-                        </>
-                    )}
-                </ModalContent>
-            </Modal>
+            </div>
         
             <canvas
                 id="canvas"
@@ -363,8 +333,39 @@ function Draw() {
                 onMouseUp={handleMouseup}
                 width={window.innerWidth}
                 height={window.innerHeight}
-                className="cursor-pointer bg-white"
+                className="cursor-crosshair bg-white"
             ></canvas>
+
+
+            <Modal size="xl" isOpen={isOpen} onOpenChange={onOpenChange}>
+                <ModalContent>
+                    {(onClose) => (
+                        <>
+                            <ModalHeader className="flex flex-col justify-center items-center gap-1 text-xl bg-[#b3a1fc]">How to use Sketch Board</ModalHeader>
+                            <ModalBody>
+                                <h1 className='font-bold'>
+                                    Welcome to Sketch Board!!
+                                </h1>
+                                <p><span className='text-[#b3a1fc] font-semibold'>Choose a tool:</span> Select a tool from tool bar.</p>
+                                <p><span className='text-[#b3a1fc] font-bold'>Drag & Move:</span> Click on the canvas and move around canvas.</p>
+                                <p><span className='text-[#b3a1fc] font-bold'>Pan:</span> Hold Swift and drag to move around the canvas.</p>
+
+                                <div>
+                                    <h1 className='font-bold'>Keyboard Shortcut</h1>
+                                    <p className='mt-2'><span className='text-[#b3a1fc] font-semibold'>Undo:</span> Ctrl + z</p>
+                                    <p className='mt-2'><span className='text-[#b3a1fc] font-semibold'>Redo:</span> Ctrl + r</p>
+                                    <p className='mt-2'><span className='text-[#b3a1fc] font-semibold'>Zoom in:</span> Ctrl + Plus</p>
+                                    <p className='mt-2'><span className='text-[#b3a1fc] font-semibold'>Zoom out:</span> Ctrl + Minus</p>
+                                </div>
+                                <h1 className='font-bold my-2'>
+                                    Enjoy your creating!!
+                                </h1>
+
+                            </ModalBody>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
         </div>
     )
 }
