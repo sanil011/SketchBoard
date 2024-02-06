@@ -91,7 +91,6 @@ function Draw() {
             context.lineWidth = db?.value;
             context.stroke()
         })
-        console.log(history)
         context.restore();
 
     }, [panOffset, scale, history]);
