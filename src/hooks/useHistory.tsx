@@ -1,8 +1,8 @@
 import { useState } from 'react'
-
+import { historyType } from '../type';
 const useHistory = () => {
 
-  const [history, setHistory] = useState([[]]);
+  const [history, setHistory] = useState<historyType>([[]]);
   const [index, setIndex] = useState(0);
   
   const setUpdate = (element:any, overwrite=false) => {

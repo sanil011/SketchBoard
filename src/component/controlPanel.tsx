@@ -11,7 +11,6 @@ interface controlPanelProps{
   undo: () => void;
   redo: () => void;
   onZoom: (value: number) => void;
-  onOpen: () => void;
 }
 
 const ControlPanel = ({ scale, setScale, onZoom,undo,redo }:controlPanelProps) => {

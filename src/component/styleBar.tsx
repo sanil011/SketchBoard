@@ -4,9 +4,9 @@ interface styleBarProps {
     strokeColor: string;
     setStrokeColor: (value:string)=>void;
     strokeValue: number;
-    setStrokeValue: (value: number | number[]) => void;
+    setStrokeValue: any;
     eraserValue: number;
-    setEraserValue: (value: number | number[]) => void;
+    setEraserValue:any;
 }
 const StyleBar = ({ strokeColor,setStrokeColor, setStrokeValue, strokeValue,eraserValue,setEraserValue }: styleBarProps) => {
     const colors = ["#E03132", "#000000", "#2F9E44", "#1A71C2", "#F08C01"]

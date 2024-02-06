@@ -1,5 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
 import '../app.css';
 import { useEffect, useState,useLayoutEffect, MouseEvent } from 'react'
 import ActionBar from "../component/actionBar"
@@ -8,8 +6,10 @@ import useHistory from "../hooks/useHistory"
 import ControlPanel from '../component/controlPanel';
 import StyleBar from '../component/styleBar';
 import { RxQuestionMarkCircled } from "react-icons/rx";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDisclosure } from "@nextui-org/react";
-function dragAndDrop(element: HTMLElement | null, event: MouseEvent<Element, MouseEvent<Element, MouseEvent>>) {
+import { Modal, ModalContent, ModalHeader, ModalBody, useDisclosure } from "@nextui-org/react";
+import { historyType, MyObject } from "../type"
+
+function dragAndDrop(element: HTMLElement | null, event: any) {
 
     if (!element) return;
 
@@ -26,7 +26,7 @@ function dragAndDrop(element: HTMLElement | null, event: MouseEvent<Element, Mou
         element.style.top = pageY - shiftY + 'px';
     }
 
-    function onMouseMove(event: MouseEvent) {
+    function onMouseMove(event: any) {
         moveAt(event.pageX, event.pageY);
     }
 
@@ -80,7 +80,7 @@ function Draw() {
             panOffset.y * scale - scaleOffsetY
         );
         context.scale(scale, scale);
-        history?.forEach((db) => {
+        history?.forEach((db:MyObject) => {
             context.beginPath();
             context.moveTo(db?.points[0].x, db?.points[0].y);
 
@@ -91,6 +91,7 @@ function Draw() {
             context.lineWidth = db?.value;
             context.stroke()
         })
+        console.log(history)
         context.restore();
 
     }, [panOffset, scale, history]);
@@ -281,7 +282,7 @@ function Draw() {
         };
         const id = history.length;
         const newElement = eraser ? { id, points: [{ x: clientX, y: clientY }], color: "#ffffff", value: eraserValue } : { id, points: [{ x: clientX, y: clientY }], color: strokeColor, value:strokeValue };
-        setUpdate((prev) => [...prev, newElement]);
+        setUpdate((prev:historyType) => [...prev, newElement]);
     };
 
 
@@ -339,7 +340,7 @@ function Draw() {
 
             <Modal size="xl" isOpen={isOpen} onOpenChange={onOpenChange}>
                 <ModalContent>
-                    {(onClose) => (
+                    {() => (
                         <>
                             <ModalHeader className="flex flex-col justify-center items-center gap-1 text-xl bg-[#b3a1fc]">How to use Sketch Board</ModalHeader>
                             <ModalBody>
