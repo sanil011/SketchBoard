@@ -30,7 +30,7 @@ function dragAndDrop(element: HTMLElement | null, event: any) {
         moveAt(event.pageX, event.pageY);
     }
 
-    // move the ball on mousemove
+
     document.addEventListener('mousemove', onMouseMove);
 
     // drop the ball, remove unneeded handlers
