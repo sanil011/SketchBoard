@@ -1,8 +1,8 @@
 import { useRef, useEffect } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
-import First from '../assets/first.png';
-import Second from "../assets/second.png";
+import First from '../assets/first1.png';
+import Second from "../assets/second2.png";
 
 function Scene() {
     const sectionRef = useRef(null);
