@@ -1,29 +1,45 @@
-# React + TypeScript + Vite
+<h1 align="center">
+            ✨ Welcome to Sketch Board ✨
+</h1>
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-Currently, two official plugins are available:
+<img width="1440" alt="Screenshot 2023-07-24 at 12 24 32 AM" src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png">
+A React and TypeScript implementation mimicking Excalidraw.
+<!-- I undertook the creation of this side project with the primary goal of acquiring new knowledge. Please note that the application lacks responsiveness, as my emphasis was primarily on implementing functionalities. This choice was made due to my existing portfolio of responsive projects. -->
+<hr/>
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-## Expanding the ESLint configuration
+<img width="1440" alt="first1 copy" src="https://github.com/sanil011/SketchBoard/assets/105095685/19f3edaa-9565-482d-a7a6-0394b1cacde3">
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+<img width="1440" alt="Screenshot 2023-07-24 at 12 24 32 AM" src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png">
 
-- Configure the top-level `parserOptions` property like this:
+## 🧐 Features
+Here're some of the project's best features:
+* Express your creativity by sketching anything on the canvas. 
+* Save and download your artistic creations. 
+* Utilize the zoom functionality for a closer look. 
+* Enjoy the panning feature, offering the illusion of an infinite canvas.
+* Take advantage of the Undo and Redo features for added convenience.
 
-```js
-   parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-   },
-```
+### 🎹 keyboard shortcut
+- **Canvas Navigation**: Hold Swift and drag to move around the canvas.
+- **Undo**: Ctrl + Z.
+- **Redo**: Ctrl + R.
+- **Zoom In**: Ctrl + Plus.
+- **Zoom Out**: Ctrl + Minus.
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
-# SketchBoard
+ ### 💻 Built with
+
+Technologies used in the project:
+
+- `Vite`
+- `React`
+- `TypeScript`
+- `CSS`
+
+### 🎥 Video
+
+https://github.com/sanil011/SketchBoard/assets/105095685/58e87716-402e-4e8c-99b1-c7363de8964c
+
+
 
