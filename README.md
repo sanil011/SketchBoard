@@ -8,8 +8,9 @@ A React and TypeScript implementation mimicking Excalidraw.
 <!-- I undertook the creation of this side project with the primary goal of acquiring new knowledge. Please note that the application lacks responsiveness, as my emphasis was primarily on implementing functionalities. This choice was made due to my existing portfolio of responsive projects. -->
 <hr/>
 
+<img width="1440" alt="first1 copy (1)" src="https://github.com/sanil011/SketchBoard/assets/105095685/b59f64a2-e6ae-46eb-a158-017ce63a3c57">
 
-<img width="1440" alt="first1 copy" src="https://github.com/sanil011/SketchBoard/assets/105095685/19f3edaa-9565-482d-a7a6-0394b1cacde3">
+
 
 <img width="1440" alt="Screenshot 2023-07-24 at 12 24 32 AM" src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png">
 
