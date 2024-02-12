@@ -23,9 +23,9 @@ Here're some of the project's best features:
 * Take advantage of the Undo and Redo features for added convenience.
 
 ### 🎹 keyboard shortcut
-- **Canvas Navigation**: Hold Swift and drag to move around the canvas.
 - **Undo**: Ctrl + Z.
 - **Redo**: Ctrl + R.
+- **Canvas Navigation**: Hold Swift and drag to move around the canvas.
 - **Zoom In**: Ctrl + Plus.
 - **Zoom Out**: Ctrl + Minus.
 
